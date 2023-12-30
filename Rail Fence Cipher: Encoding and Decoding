@@ -45,8 +45,41 @@ public class RailFenceCipher {
       return encodedText;
     }
     
-    static String decode(String s, int n) {
-        // Your code here
-        return null;
+    static String decode(String encodedText, int railNum) {
+      char[] decodedText = new char[encodedText.length()]; // array indices used as location markers
+      
+      // reverse the encoding (choose index by calculating offset, position character, move to next)
+      int[] railIndex = new int[2]; // index 0 static, index 1 as a counter
+      int positionChar;
+      for (int currentRail = 0; currentRail < railNum; currentRail++) {
+        positionChar = currentRail;
+        int lowerOffset = 2*(railNum - currentRail) - 2;
+        int upperOffset = 2*currentRail;
+        
+        for (int i = 0; positionChar < encodedText.length(); i++) {
+          decodedText[positionChar] = encodedText.charAt(i + railIndex[0]);
+          
+          // alternating offsets, excluding first and last rails
+          if (currentRail == 0) positionChar += lowerOffset;
+          else if (currentRail == railNum - 1) positionChar += upperOffset;
+          else if (i % 2 == 0) {
+            positionChar += lowerOffset;
+          } else {
+            positionChar += upperOffset;
+          }
+          railIndex[1]++;
+        }
+        
+        // begin next iteration at the next character
+        railIndex[0] = railIndex[1];
+      }
+      
+      // concatenate character array to output string
+      String plainText = "";
+      for (char c : decodedText) {
+        plainText += c;
+      }
+      
+      return plainText;
     }
 }
