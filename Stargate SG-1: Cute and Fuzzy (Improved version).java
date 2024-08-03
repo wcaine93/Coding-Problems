@@ -43,8 +43,6 @@ public class SG1 {
     solvedDiagram = "";
     paths = new TreeMap<>();
     
-    // System.out.println(exWires);
-    
     generateWireMatrx(exWires);
     generateCostMap(exWires);
     
@@ -58,7 +56,6 @@ public class SG1 {
       pathfinder();
     }
     
-    // System.out.println(solution);
     if (solvedDiagram == "") return "Oh for crying out loud...";
     else return solvedDiagram;
   }
@@ -84,7 +81,6 @@ public class SG1 {
     Pos startPos = new Pos(wireDiagram.indexOf('S') % rowLength, wireDiagram.indexOf('S') / rowLength);
     Pos goalPos = new Pos(wireDiagram.indexOf('G') % rowLength, wireDiagram.indexOf('G') / rowLength);
     double regression = (double) (goalPos.y - startPos.y) / (goalPos.x - startPos.x);
-    //System.out.println(regression);
     
     for (int i = 0; i < costMap.length; i++) {
       for (int j = 0; j < costMap[0].length; j++) {
@@ -100,9 +96,7 @@ public class SG1 {
         deviation *= i - goalPos.y < regression*(j - goalPos.x) ? -1 : 1;
         
         costMap[i][j] = (double) 1/2*(deviation + distance);
-        //System.out.printf("%f\t", costMap[i][j]);
       }
-      //System.out.println();
     }
   }
   
@@ -124,15 +118,12 @@ public class SG1 {
       solution += '\n';
     }
     
-    //System.out.println(solution);
     solvedDiagram = solution;
   }
   
   private static void pathfinder() {
-    paths.forEach((k, v) -> System.out.printf("(%d, %d)\t%f\n", v.getPosition().x, v.getPosition().y, k));
-    System.out.println();
     Path currentPath = paths.get(paths.firstKey());
-    print(currentPath);
+    // print(currentPath);
     paths.remove(paths.firstKey());
     
     Pos currentPos = currentPath.getPosition();
@@ -178,22 +169,15 @@ public class SG1 {
       // remove any paths reaching the same end with higher cost
       List<Double> duplicates = new LinkedList<>();
       Double newCost = totalCost;
-      //System.out.printf("\nHere: (%d, %d)\t%12f\n", newPos.x, newPos.y, newCost);
       paths.tailMap(totalCost)
         .forEach((k, v) -> {
-          //System.out.print(v.getPosition().equals(newPos) ? "Same" : "Different");
-          //System.out.printf("(%d, %d)\t%12f\n", v.getPosition().x, v.getPosition().y, k);
           if (v.getPosition().equals(newPos)) duplicates.add(k);
         });
       duplicates.listIterator().forEachRemaining((k) -> paths.remove(k));
       
       // record in paths
       paths.put(totalCost, newPath);
-      // System.out.printf("(%d, %d) ", newPos.x, newPos.y);
-      // System.out.println(totalCost);
     }
-    //System.out.println();
-    //System.out.println();
   }
 }
 
