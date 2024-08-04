@@ -13,13 +13,14 @@ import java.util.Arrays;
 
 public class SG1 {
   private static char[][] wireMatrx;
+  private static char[][] searchMatrx;
   private static double[][] costMap;
   public static SortedMap<Double, Path> paths;
   static String solvedDiagram;
   
   public static void print(Path path) {
     // create a deep copy of wireMatrx
-    char[][] printMatrx = Arrays.stream(wireMatrx)
+    char[][] printMatrx = Arrays.stream(searchMatrx)
                                 .map(char[]::clone)
                                 .toArray(char[][]::new);
     
@@ -27,7 +28,7 @@ public class SG1 {
     i.forEachRemaining((pos) -> {
       Pos p = (Pos) pos;
       if (printMatrx[p.y][p.x] != 'S') printMatrx[p.y][p.x] = 'P';
-      System.out.printf("(%d, %d)\n", p.x, p.y);
+      //System.out.printf("(%d, %d)\n", p.x, p.y);
     });
     
     for (int j = 0; j < printMatrx.length; j++) {
@@ -71,10 +72,77 @@ public class SG1 {
       }
     }
     
-    wireMatrx = matrx;
+    wireMatrx = Arrays.stream(matrx)
+                  .map(char[]::clone)
+                  .toArray(char[][]::new);
+    deadEndRemove(matrx);
+    searchMatrx = Arrays.stream(matrx)
+                    .map(char[]::clone)
+                    .toArray(char[][]::new);
   }
   
-  public static void generateCostMap(String wireDiagram) {
+  private static void deadEndRemove(char[][] matrx) {
+    int[][] offsets = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+    for (int i = 0; i < matrx.length; i++) {
+      for (int j  = 0; j < matrx[0].length; j++) {
+        if (matrx[i][j] != '.') continue;
+        
+        // recursively remove dead ends (and remove some unnecessary corners)
+        Pos currentPos = new Pos(j, i);
+        char[] neighbors = new char[offsets.length];
+        while (true) {
+          // record neighboring chars
+          for (int k = 0; k < neighbors.length; k++) {
+            Pos checkPos = currentPos.move(offsets[k][1], offsets[k][0]);
+            if (checkPos.y < 0 || checkPos.y >= matrx.length) neighbors[k] = 'X';
+            else if (checkPos.x < 0 || checkPos.x >= matrx[0].length) neighbors[k] = 'X';
+            else neighbors[k] = matrx[checkPos.y][checkPos.x];
+          }
+          
+          // check neighbors for adjacency
+          boolean connected = false;
+          for (int k = 0; k < neighbors.length; k++) {
+            if (neighbors[k] == 'X') continue;
+            
+            if (k % 2 == 0) {
+              // for cardinal directions, there must be a connection on the other side of the character
+              if (neighbors[(k + 3) % 8] != 'X' || 
+                  neighbors[(k + 4) % 8] != 'X' || 
+                  neighbors[(k + 5) % 8] != 'X') {
+                connected = true;
+                break;
+              }
+            } else {
+              if (neighbors[(k + 2) % 8] != 'X' || 
+                  neighbors[(k + 3) % 8] != 'X' || 
+                  neighbors[(k + 4) % 8] != 'X' || 
+                  neighbors[(k + 5) % 8] != 'X' || 
+                  neighbors[(k + 6) % 8] != 'X') {
+                connected = true;
+                break;
+              }
+            }
+          }
+          if (connected) break;
+          
+          
+          Pos nextPos = new Pos(-1, -1);
+          for (int k = 0; k < neighbors.length; k++) {
+            if (neighbors[k] == '.') {
+              nextPos = currentPos.move(offsets[k][1], offsets[k][0]);
+              break;
+            }
+          }
+          matrx[currentPos.y][currentPos.x] = 'X';
+          
+          if (!nextPos.equals(new Pos(-1, -1))) currentPos = nextPos;
+          else break;
+        }
+      }
+    }
+  }
+  
+  private static void generateCostMap(String wireDiagram) {
     costMap = new double[wireMatrx.length][wireMatrx[0].length];
     
     int rowLength = wireDiagram.indexOf("\n") + 1;
@@ -100,7 +168,7 @@ public class SG1 {
     }
   }
   
-  public static void generateSolutionString(Path solutionPath) {
+  private static void generateSolutionString(Path solutionPath) {
     String solution = "";
     
     ListIterator i = solutionPath.getPath();
@@ -123,7 +191,6 @@ public class SG1 {
   
   private static void pathfinder() {
     Path currentPath = paths.get(paths.firstKey());
-    // print(currentPath);
     paths.remove(paths.firstKey());
     
     Pos currentPos = currentPath.getPosition();
@@ -132,9 +199,9 @@ public class SG1 {
     int[][] offsets = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
     for (int i = 0; i < adjacents.length; i++) {
       Pos adjPos = currentPos.move(offsets[i][0], offsets[i][1]);
-      if (adjPos.y < 0 || adjPos.y >= wireMatrx.length) continue;
-      if (adjPos.x < 0 || adjPos.x >= wireMatrx[0].length) continue;
-      if (wireMatrx[adjPos.y][adjPos.x] == 'X') continue;
+      if (adjPos.y < 0 || adjPos.y >= searchMatrx.length) continue;
+      if (adjPos.x < 0 || adjPos.x >= searchMatrx[0].length) continue;
+      if (searchMatrx[adjPos.y][adjPos.x] == 'X') continue;
       // don't allow positions already in the path
       ListIterator path = currentPath.getPath();
       boolean blocked = false;
@@ -144,7 +211,7 @@ public class SG1 {
       if (blocked) continue;
       
       // test for completion
-      if (wireMatrx[adjPos.y][adjPos.x] == 'G') {
+      if (searchMatrx[adjPos.y][adjPos.x] == 'G') {
         generateSolutionString(currentPath);
         return;
       } else adjacents[i] = adjPos;
@@ -163,7 +230,8 @@ public class SG1 {
       
       // do not record if there is another path reaching the same end with lesser cost
       Boolean[] longer = {false};
-      paths.headMap(totalCost).forEach((k, v) -> longer[0] = !longer[0] && v.getPosition().equals(newPos) ? true : false);
+      paths.headMap(totalCost).
+        forEach((k, v) -> longer[0] = !longer[0] && v.getPosition().equals(newPos) ? true : false);
       if (longer[0]) continue;
       
       // remove any paths reaching the same end with higher cost
