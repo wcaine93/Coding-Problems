@@ -20,16 +20,20 @@ public class BF {
   public boolean validate() {
     int[][] field = possibleFields.get(0);
     
-    // verify that exactly 20 cells are occupied by ships
-    int shipCellCount = 0;
-    for (int[] row : field) for (int cell : row) if (cell == 1) shipCellCount++;
-    if (shipCellCount != 20) return false;
+    if (!shipCount(field)) return false;
     
     while (!solution) {
       if (!possibleFields.isEmpty()) branch();
       else return false;
     }
     return true;
+  }
+  
+  private boolean shipCount(int[][] field) {
+    // verify that exactly 20 cells are occupied by ships
+    int shipCellCount = 0;
+    for (int[] row : field) for (int cell : row) if (cell == 1) shipCellCount++;
+    if (shipCellCount != 20) return false;
   }
   
   public void branch() {
