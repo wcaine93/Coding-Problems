@@ -20,7 +20,10 @@ public class BF {
   public boolean validate() {
     int[][] field = possibleFields.get(0);
     
-    if (!shipCount(field)) return false;
+    // verify that exactly 20 cells are occupied by ships
+    int shipCellCount = 0;
+    for (int[] row : field) for (int cell : row) if (cell == 1) shipCellCount++;
+    if (shipCellCount != 20) return false;
     
     while (!solution) {
       if (!possibleFields.isEmpty()) branch();
@@ -29,27 +32,20 @@ public class BF {
     return true;
   }
   
-  private boolean shipCount(int[][] field) {
-    // verify that exactly 20 cells are occupied by ships
-    int shipCellCount = 0;
-    for (int[] row : field) for (int cell : row) if (cell == 1) shipCellCount++;
-    if (shipCellCount != 20) return false;
-  }
-  
   public void branch() {
     // default call
     int[][] field = possibleFields.get(0);
-    branch(field, field);
+    branch(field, field, setShips.get(0), false);
   }
   
-  public void branch(int[][] field, int[][] currField) {
+  public void branch(int[][] field, int[][] currField, int[] shipCount, boolean branch) {
     // recursively generate all the possible ships orientations for a given field
     // starts generation with the largest ship and goes to the smallest possible
     int searchSize = 0;
-    if (setShips.get(0)[0] < 1) searchSize = 4; // battleship (1x size 4)
-    else if (setShips.get(0)[1] < 2) searchSize = 3; // cruiser (2x size 3)
-    else if (setShips.get(0)[2] < 3) searchSize = 2; // destroyer (3x size 2)
-    else if (setShips.get(0)[3] < 4) searchSize = 1; // submarine (4x size 1)
+    if (shipCount[0] < 1) searchSize = 4; // battleship (1x size 4)
+    else if (shipCount[1] < 2) searchSize = 3; // cruiser (2x size 3)
+    else if (shipCount[2] < 3) searchSize = 2; // destroyer (3x size 2)
+    else if (shipCount[3] < 4) searchSize = 1; // submarine (4x size 1)
     else { // means all ships have a valid position
       solution = true;
       return;
@@ -71,13 +67,15 @@ public class BF {
           int[][] newField = fieldClone(field);
           for (int i = 0; i < searchSize; i++) newField[row][col-i] = -1;
           possibleFields.add(newField);
-          setShips.get(0)[4-searchSize]++;
+          int[] newCount = shipCount.clone();
+          newCount[4-searchSize]++;
+          setShips.add(newCount);
           
           // branch with each of the possible cells removed to force generation of other orientations, if they exist
           for (int i = 0; i < searchSize; i++) {
             newField = fieldClone(currField);
             newField[row][col-i] = -1;
-            branch(field, newField);
+            branch(field, newField, shipCount, true);
           }
         }
       }
@@ -96,23 +94,27 @@ public class BF {
         if (size == searchSize) {
           // mark the orientation with X and add to the possible fields with updated set ship count
           int[][] newField = fieldClone(field);
-          for (int i = 0; i < searchSize; i++) newField[row][col-i] = -1;
+          for (int i = 0; i < searchSize; i++) newField[row-i][col] = -1;
           possibleFields.add(newField);
-          setShips.get(0)[4-searchSize]++;
+          int[] newCount = shipCount.clone();
+          newCount[4-searchSize]++;
+          setShips.add(newCount);
           
           // branch with each of the possible cells removed to force generation of other orientations, if they exist
           for (int i = 0; i < searchSize; i++) {
             newField = fieldClone(currField);
-            newField[row][col-i] = -1;
-            branch(field, newField);
+            newField[row-i][col] = -1;
+            branch(field, newField, shipCount, true);
           }
         }
       }
     }
     
     // if no possible orientations exist or options have been exhausted
-    possibleFields.remove(0);
-    setShips.remove(0);
+    if (!branch) {
+      possibleFields.remove(0);
+      setShips.remove(0);
+    } else return; // destroy the branch if this is a branch
   }
   
   public int[][] fieldClone(int[][] field) {
