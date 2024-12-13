@@ -65,36 +65,38 @@ public class AssemblerInterpreter {
       
       // interpret command
       switch (command) {
-          case ";" -> {}
-          case "end" -> {
-            executing = false;
-            return;
-          }
-          case "ret" -> { return; }
-          case "msg" -> {
-            while (args.hasNext()) { // account for unbounded # of args
-              if (args.hasNext(".*'.*")) { // single quoted string
-                String str = args.next().trim();
-                // remove the first single quote and the last
-                stdout.add(str.substring(1, str.length() - 1));
-              } else { // handle registers
-                stdout.add(registers.get(args.next().trim()).toString());
-              }
+        case ";" -> {}
+        case "end" -> {
+          executing = false;
+          return;
+        }
+        case "ret" -> { return; }
+        case "msg" -> {
+          while (args.hasNext()) { // account for unbounded # of args
+            if (args.hasNext(".*'.*")) { // single quoted string
+              String str = args.next().trim();
+              // remove the first single quote and the last
+              stdout.add(str.substring(1, str.length() - 1));
+            } else { // handle registers
+              stdout.add(registers.get(args.next().trim()).toString());
             }
           }
+        }
+        
+        case "mov" -> {
+          String toReg = args.next().trim();
+          String copyReg = args.next().trim();
           
-          case "mov" -> {
-            String toReg = args.next().trim();
-            String copyReg = args.next().trim();
-            
-            // if the input is not a register, it is a number
-            int val = registers.getOrDefault(copyReg, Integer.parseInt(copyReg));
-            
-            registers.put(toReg, val);
-            System.out.println(registers);
-          }
+          // if the input is not a register, it is a number
+          int val = registers.getOrDefault(copyReg, Integer.parseInt(copyReg));
           
-          default -> System.out.println("Invalid command");
+          registers.put(toReg, val);
+          System.out.println(registers);
+        }
+        case "inc" -> registers.compute(args.next().trim(), (k,v) -> v+1);
+        case "dec" -> registers.compute(args.next().trim(), (k,v) -> v-1);
+        
+        default -> System.out.println("Invalid command");
       }
     }
   }
