@@ -16,19 +16,20 @@ public class AssemblerInterpreter {
   
   static ArrayList<String> stdout = new ArrayList<>();
   static boolean executing;
+  static boolean terminated;
     
   public static String interpret(final String input) {
-    label(input);
-    System.out.println(labels);
-    
+    flush();
     executing = true;
+    terminated = false;
+    
+    label(input);
     interpret(input, 0);
-    if (executing) return null; // return null if execution ends without end statement
+    // return null if execution ends without end statement
+    if (executing || terminated) return null;
     
     String output = "";
     for (String s : stdout.toArray(new String[0])) output += s;
-    System.out.println(output);
-    terminate();
     return output;
   }
   
@@ -47,7 +48,7 @@ public class AssemblerInterpreter {
   }
   
   public static void interpret(final String input, int callPos) {
-    if (!executing) return;
+    if (!executing || terminated) return;
     
     Scanner rawCode = new Scanner(input);
     for (int i = 0; i <= callPos; i++) rawCode.nextLine(); // start on line after callPos
@@ -92,7 +93,7 @@ public class AssemblerInterpreter {
               // remove the first single quote and the last
               stdout.add(str.substring(1, str.length() - 1));
             } else { // handle registers
-              stdout.add(registers.get(args.next().trim()).toString());
+              stdout.add(registers.getOrDefault(args.next().trim(), 0).toString());
             }
           }
         }
@@ -105,7 +106,6 @@ public class AssemblerInterpreter {
           int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.put(storeReg, val);
-          System.out.println(registers);
         }
         case "inc" -> registers.compute(args.next().trim(), (k,v) -> v+1);
         case "dec" -> registers.compute(args.next().trim(), (k,v) -> v-1);
@@ -197,9 +197,12 @@ public class AssemblerInterpreter {
         default -> System.out.println("Invalid command: " + command);
       }
     }
+    
+    // end of execution reached without end
+    terminated = true;
   }
   
-  public static void terminate() {
+  public static void flush() {
     registers.clear();
     labels.clear();
     stdout.clear();
