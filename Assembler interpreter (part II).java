@@ -25,6 +25,7 @@ public class AssemblerInterpreter {
     
     String output = "";
     for (String s : stdout.toArray(new String[0])) output += s;
+    System.out.println(output);
     terminate();
     return output;
   }
@@ -51,22 +52,39 @@ public class AssemblerInterpreter {
     for (int i = 0; i < callPos; i++) rawCode.nextLine(); // start on line callPos
     
     while (rawCode.hasNext()) {
-      String read = rawCode.next();
-      switch (read) {
-          case ";" -> break;
+      // read first token on line as command
+      String command = rawCode.next();
+      System.out.println(command);
+      
+      // read further tokens as arguments
+      String line = rawCode.nextLine();
+      System.out.println(line);
+      // remove comments if they exist
+      if (line.indexOf(";") != -1) line = line.substring(0, line.indexOf(";"));
+      Scanner args = new Scanner(line).useDelimiter(",");
+      
+      // interpret command
+      switch (command) {
+          case ";" -> {}
           case "end" -> {
             executing = false;
             return;
           }
-          case "ret" -> return;
+          case "ret" -> { return; }
           case "msg" -> {
-            // single quote output
-            if rawCode.hasNext("'\\.\\*"); // /'.*/
+            while (args.hasNext()) { // account for unbounded # of args
+              if (args.hasNext("'.*")) { // single quoted string
+                String str = args.next();
+                // remove the first single quote and the last
+                stdout.add(str.substring(1, str.length() - 2));
+              } else { // handle registers
+                // remove leading and trailing spaces
+                stdout.add(registers.get(args.next().trim()).toString());
+              }
+            }
           }
-          default -> throw new Exception("Invalid command");
+          default -> System.out.println("Invalid command");
       }
-      
-      rawCode.nextLine();
     }
   }
   
