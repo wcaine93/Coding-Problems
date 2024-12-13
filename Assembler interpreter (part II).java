@@ -82,6 +82,9 @@ public class AssemblerInterpreter {
             }
           }
         }
+        case "call" -> {
+          interpret(input, labels.get(args.next().trim()));
+        }
 
         case "mov" -> {
           String storeReg = args.next().trim();
