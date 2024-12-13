@@ -1,7 +1,7 @@
 /* 
  * https://www.codewars.com/kata/58e61f3d8ff24f774400002c
  *
- * Accepts a string of assembly language as input and returns the output. See kata for more details.
+ * Accepts a string of pre-validated assembly language as input and returns the output. See kata for more details.
  */
 
 import java.util.ArrayList;
@@ -53,6 +53,7 @@ public class AssemblerInterpreter {
     Scanner rawCode = new Scanner(input);
     for (int i = 0; i <= callPos; i++) rawCode.nextLine(); // start on line after callPos
     
+    int compare = 0; // for use by cmp
     while (rawCode.hasNext()) {
       // read first token on line as command
       String command = rawCode.next();
@@ -84,7 +85,7 @@ public class AssemblerInterpreter {
             }
           }
         }
-        case "call" -> {
+        case "call", "jmp" -> {
           interpret(input, labels.get(args.next().trim()));
         }
 
@@ -135,6 +136,36 @@ public class AssemblerInterpreter {
           int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.compute(storeReg, (k, v) -> (int) (v/val));
+        }
+          
+        case "cmp" -> {
+          String reg1 = args.next().trim();
+          String reg2 = args.next().trim();
+          
+          // if the input is not a register, it is a number
+          int val1 = registers.keySet().contains(reg1) ? registers.get(reg1) : Integer.parseInt(reg1);
+          int val2 = registers.keySet().contains(reg2) ? registers.get(reg2) : Integer.parseInt(reg2);
+          
+          // store result as -1 (less than), 0 (equal), 1 (greater than)
+          compare = val1 > val2 ? 1 : val1 < val2 ? -1 : 0;
+        }
+        case "je" -> {
+          if (compare == 0) interpret(input, labels.get(args.next().trim()));
+        }
+        case "jne" -> {
+          if (compare != 0) interpret(input, labels.get(args.next().trim()));
+        }
+        case "jge" -> {
+          if (compare >= 0) interpret(input, labels.get(args.next().trim()));
+        }
+        case "jle" -> {
+          if (compare <= 0) interpret(input, labels.get(args.next().trim()));
+        }
+        case "jg" -> {
+          if (compare > 0) interpret(input, labels.get(args.next().trim()));
+        }
+        case "jl" -> {
+          if (compare < 0) interpret(input, labels.get(args.next().trim()));
         }
 
         default -> System.out.println("Invalid command: " + command);
