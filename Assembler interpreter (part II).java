@@ -11,7 +11,7 @@ import static java.util.Map.entry;
 import java.util.Scanner;
 
 public class AssemblerInterpreter {
-  static ArrayList<Integer> registers = new ArrayList<>();
+  static Map<String, Integer> registers = new HashMap<>();
   static Map<String, Integer> labels = new HashMap<>(); // links register names to line numbers
   
   // assign a code to each command
@@ -39,15 +39,18 @@ public class AssemblerInterpreter {
     entry("end", 30), // terminates execution
     entry(";", 40) // begin a line comment
   );
+  
+  static ArrayList<String> stdout = new ArrayList<>();
     
   public static String interpret(final String input) {
-    Scanner rawCode = new Scanner(input);
-    
     label(input);
     
-    // TODO: then create separate interpret method for returning to call position
+    interpret(input, 0);
     
-    return null;
+    String output = "";
+    for (String s : stdout.toArray(new String[0])) output += s;
+    terminate();
+    return output;
   }
   
   public static void label(String input) {
@@ -65,8 +68,15 @@ public class AssemblerInterpreter {
     }
   }
   
+  public static void interpret(final String input, int callPos) {
+    Scanner rawCode = new Scanner(input);
+    
+    
+  }
+  
   public static void terminate() {
     registers.clear();
     labels.clear();
+    stdout.clear();
   }
 }
