@@ -73,16 +73,27 @@ public class AssemblerInterpreter {
           case "ret" -> { return; }
           case "msg" -> {
             while (args.hasNext()) { // account for unbounded # of args
-              if (args.hasNext("'.*")) { // single quoted string
-                String str = args.next();
+              if (args.hasNext(".*'.*")) { // single quoted string
+                String str = args.next().trim();
                 // remove the first single quote and the last
-                stdout.add(str.substring(1, str.length() - 2));
+                stdout.add(str.substring(1, str.length() - 1));
               } else { // handle registers
-                // remove leading and trailing spaces
                 stdout.add(registers.get(args.next().trim()).toString());
               }
             }
           }
+          
+          case "mov" -> {
+            String toReg = args.next().trim();
+            String copyReg = args.next().trim();
+            
+            // if the input is not a register, it is a number
+            int val = registers.getOrDefault(copyReg, Integer.parseInt(copyReg));
+            
+            registers.put(toReg, val);
+            System.out.println(registers);
+          }
+          
           default -> System.out.println("Invalid command");
       }
     }
