@@ -38,7 +38,7 @@ public class AssemblerInterpreter {
     int lineNum = 0;
     while (rawCode.hasNext()) {
       String line = rawCode.nextLine();
-      if (line.indexOf(':') != -1) {
+      if (line.contains(":")) {
         labels.put(line.substring(0, line.indexOf(':')), lineNum);
       }
       
@@ -60,7 +60,7 @@ public class AssemblerInterpreter {
       // read further tokens as arguments
       String line = rawCode.nextLine();
       // remove comments if they exist
-      if (line.indexOf(";") != -1) line = line.substring(0, line.indexOf(";"));
+      if (line.contains(";")) line = line.substring(0, line.indexOf(";"));
       Scanner args = new Scanner(line).useDelimiter(",");
       
       // interpret command
@@ -82,6 +82,13 @@ public class AssemblerInterpreter {
           while (args.hasNext()) { // account for unbounded # of args
             if (args.hasNext(".*'.*")) { // single quoted string
               String str = args.next().trim();
+              
+              // validate that str is the whole quoted portion
+              if (str.length() == 1 || !str.endsWith("'")) {
+                // if a comma is in a quoted region, adds the latter half of the region
+                str += "," + args.next();
+                str = str.trim();
+              }
               // remove the first single quote and the last
               stdout.add(str.substring(1, str.length() - 1));
             } else { // handle registers
