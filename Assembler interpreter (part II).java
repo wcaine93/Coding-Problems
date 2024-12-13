@@ -82,21 +82,57 @@ public class AssemblerInterpreter {
             }
           }
         }
-        
+
         case "mov" -> {
-          String toReg = args.next().trim();
-          String copyReg = args.next().trim();
-          
+          String storeReg = args.next().trim();
+          String inputReg = args.next().trim();
+
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(copyReg, Integer.parseInt(copyReg));
-          
-          registers.put(toReg, val);
+          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+
+          registers.put(storeReg, val);
           System.out.println(registers);
         }
         case "inc" -> registers.compute(args.next().trim(), (k,v) -> v+1);
         case "dec" -> registers.compute(args.next().trim(), (k,v) -> v-1);
-        
-        default -> System.out.println("Invalid command");
+        case "add" -> {
+          String storeReg = args.next().trim();
+          String inputReg = args.next().trim();
+
+          // if the input is not a register, it is a number
+          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+
+          registers.compute(storeReg, (k, v) -> v+val);
+        }
+        case "sub" -> {
+          String storeReg = args.next().trim();
+          String inputReg = args.next().trim();
+
+          // if the input is not a register, it is a number
+          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+
+          registers.compute(storeReg, (k, v) -> v-val);
+        }
+        case "mul" -> {
+          String storeReg = args.next().trim();
+          String inputReg = args.next().trim();
+
+          // if the input is not a register, it is a number
+          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+
+          registers.compute(storeReg, (k, v) -> v*val);
+        }
+        case "div" -> {
+          String storeReg = args.next().trim();
+          String inputReg = args.next().trim();
+
+          // if the input is not a register, it is a number
+          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+
+          registers.compute(storeReg, (k, v) -> (int) (v/val));
+        }
+
+        default -> System.out.println("Invalid command: " + command);
       }
     }
   }
