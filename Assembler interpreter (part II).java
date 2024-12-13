@@ -15,11 +15,13 @@ public class AssemblerInterpreter {
   static Map<String, Integer> labels = new HashMap<>(); // links register names to line numbers
   
   static ArrayList<String> stdout = new ArrayList<>();
-  static boolean executing = true;
+  static boolean executing;
     
   public static String interpret(final String input) {
     label(input);
+    System.out.println(labels);
     
+    executing = true;
     interpret(input, 0);
     if (executing) return null; // return null if execution ends without end statement
     
@@ -49,7 +51,7 @@ public class AssemblerInterpreter {
     if (!executing) return;
     
     Scanner rawCode = new Scanner(input);
-    for (int i = 0; i < callPos; i++) rawCode.nextLine(); // start on line callPos
+    for (int i = 0; i <= callPos; i++) rawCode.nextLine(); // start on line after callPos
     
     while (rawCode.hasNext()) {
       // read first token on line as command
@@ -91,7 +93,7 @@ public class AssemblerInterpreter {
           String inputReg = args.next().trim();
 
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+          int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.put(storeReg, val);
           System.out.println(registers);
@@ -103,7 +105,7 @@ public class AssemblerInterpreter {
           String inputReg = args.next().trim();
 
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+          int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.compute(storeReg, (k, v) -> v+val);
         }
@@ -112,7 +114,7 @@ public class AssemblerInterpreter {
           String inputReg = args.next().trim();
 
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+          int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.compute(storeReg, (k, v) -> v-val);
         }
@@ -121,7 +123,7 @@ public class AssemblerInterpreter {
           String inputReg = args.next().trim();
 
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+          int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.compute(storeReg, (k, v) -> v*val);
         }
@@ -130,7 +132,7 @@ public class AssemblerInterpreter {
           String inputReg = args.next().trim();
 
           // if the input is not a register, it is a number
-          int val = registers.getOrDefault(inputReg, Integer.parseInt(inputReg));
+          int val = registers.keySet().contains(inputReg) ? registers.get(inputReg) : Integer.parseInt(inputReg);
 
           registers.compute(storeReg, (k, v) -> (int) (v/val));
         }
