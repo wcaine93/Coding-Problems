@@ -43,10 +43,26 @@ public class AssemblerInterpreter {
   public static String interpret(final String input) {
     Scanner rawCode = new Scanner(input);
     
-    // TODO: first read through code searching for labels
+    label(input);
+    
     // TODO: then create separate interpret method for returning to call position
     
     return null;
+  }
+  
+  public static void label(String input) {
+    Scanner rawCode = new Scanner(input);
+    
+    int lineNum = 0;
+    while (rawCode.hasNext()) {
+      String line = rawCode.nextLine();
+      if (line.indexOf(':') != -1) {
+        labels.put(line.substring(0, line.indexOf(':')), lineNum);
+        continue;
+      }
+      
+      lineNum++;
+    }
   }
   
   public static void terminate() {
