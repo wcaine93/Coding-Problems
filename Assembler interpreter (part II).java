@@ -40,7 +40,6 @@ public class AssemblerInterpreter {
       String line = rawCode.nextLine();
       if (line.indexOf(':') != -1) {
         labels.put(line.substring(0, line.indexOf(':')), lineNum);
-        continue;
       }
       
       lineNum++;
@@ -57,11 +56,9 @@ public class AssemblerInterpreter {
     while (rawCode.hasNext()) {
       // read first token on line as command
       String command = rawCode.next();
-      System.out.println(command);
       
       // read further tokens as arguments
       String line = rawCode.nextLine();
-      System.out.println(line);
       // remove comments if they exist
       if (line.indexOf(";") != -1) line = line.substring(0, line.indexOf(";"));
       Scanner args = new Scanner(line).useDelimiter(",");
@@ -74,6 +71,13 @@ public class AssemblerInterpreter {
           return;
         }
         case "ret" -> { return; }
+        case "call" -> {
+          interpret(input, labels.get(args.next().trim()));
+        }
+        case "jmp" -> {
+          interpret(input, labels.get(args.next().trim()));
+          return;
+        }
         case "msg" -> {
           while (args.hasNext()) { // account for unbounded # of args
             if (args.hasNext(".*'.*")) { // single quoted string
@@ -84,9 +88,6 @@ public class AssemblerInterpreter {
               stdout.add(registers.get(args.next().trim()).toString());
             }
           }
-        }
-        case "call", "jmp" -> {
-          interpret(input, labels.get(args.next().trim()));
         }
 
         case "mov" -> {
@@ -150,22 +151,40 @@ public class AssemblerInterpreter {
           compare = val1 > val2 ? 1 : val1 < val2 ? -1 : 0;
         }
         case "je" -> {
-          if (compare == 0) interpret(input, labels.get(args.next().trim()));
+          if (compare == 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
         case "jne" -> {
-          if (compare != 0) interpret(input, labels.get(args.next().trim()));
+          if (compare != 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
         case "jge" -> {
-          if (compare >= 0) interpret(input, labels.get(args.next().trim()));
+          if (compare >= 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
         case "jle" -> {
-          if (compare <= 0) interpret(input, labels.get(args.next().trim()));
+          if (compare <= 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
         case "jg" -> {
-          if (compare > 0) interpret(input, labels.get(args.next().trim()));
+          if (compare > 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
         case "jl" -> {
-          if (compare < 0) interpret(input, labels.get(args.next().trim()));
+          if (compare < 0) {
+            interpret(input, labels.get(args.next().trim()));
+            return;
+          }
         }
 
         default -> System.out.println("Invalid command: " + command);
