@@ -59,8 +59,11 @@ public class ParseHer {
   
     public void count() {
       for (String group : groups) {
+        String root = group.replace(identifySuffix(group), "");
+        if (root.equals("")) continue;
+        
         for (int i = 1; i < RADICALS.length+1; i++) {
-          if (group.replace(identifySuffix(group), "").equals(RADICALS[i-1])) {
+          if (root.equals(RADICALS[i-1])) {
             final int addC = i;
             final int addH = 2*i+2;
             elementCount.compute("C", (k,v) -> v+addC);
@@ -72,12 +75,13 @@ public class ParseHer {
     }
   
     private String identifySuffix(String group) {
-      if (group.contains("ane")) return "ane";
-      if (group.contains("ene")) {
-        elementCount.compute("H", (k,v) -> v-2);
-        return "ene";
-      }
+      String suffix = group;
+      for (String root : RADICALS) suffix = suffix.replace(root, "");
+      System.out.println("Suffix: " + suffix);
       
-      return "";
+      // do nothing if suffix is "ane"
+      if (suffix.equals("ene") || suffix.equals("yl")) elementCount.compute("H", (k,v) -> v-2);
+      
+      return suffix;
     }
 }
