@@ -59,13 +59,15 @@ public class ParseHer {
   
     public void count() {
       for (String group : groups) {
-        String root = group.replace(identifySuffix(group), "");
+        String root = group.replace(identifyPrefix(group), "");
+        root = root.replace(identifySuffix(root), "");
+        System.out.println("Root: " + root);
         if (root.equals("")) continue;
         
         for (int i = 1; i < RADICALS.length+1; i++) {
           if (removeMultipliers(root).equals(RADICALS[i-1])) {
             final int addC = i*getMultiplier(root);
-            final int addH = 2*addC + 2;
+            final int addH = (2*i + 2)*getMultiplier(root);
             elementCount.compute("C", (k,v) -> v+addC);
             elementCount.compute("H", (k,v) -> v+addH);
             break;
@@ -76,7 +78,7 @@ public class ParseHer {
   
     private int getMultiplier(String group) {
       for (String root : RADICALS) group = group.replace(root, "");
-      System.out.println("Group: " + group);
+      System.out.println("Multiplier: " + group);
       
       int multiplier = 1;
       for (int i = 2; i < MULTIPLIERS.length+2; i++) {
@@ -101,20 +103,45 @@ public class ParseHer {
     private String identifySuffix(String group) {
       String suffix = group;
       for (String root : RADICALS) suffix = suffix.replace(root, "");
+      if (suffix == "") return "";
       System.out.println("Suffix: " + suffix);
       
-      suffix = removeMultipliers(suffix);
       int multiplier = getMultiplier(suffix);
+      suffix = removeMultipliers(suffix);
       
       int addH = 0;
       // do nothing if suffix is "ane"
       if (suffix.equals("ene") || suffix.equals("yl")) addH -= 2;
+      if (suffix.equals("yne")) addH -= 4;
       
       
       final int subH = multiplier*addH;
-      System.out.println(elementCount.get("H"));
       elementCount.compute("H", (k,v) -> v+subH);
-      System.out.println(elementCount.get("H"));
+      System.out.println("Clean suffix: " + suffix);
       return suffix;
+    }
+  
+    private String identifyPrefix(String group) {
+      String prefix = group;
+      for (String root : RADICALS) prefix = prefix.replace(root, "");
+      if (prefix == "") return "";
+      System.out.println("Prefix: " + prefix);
+      
+      int multiplier = getMultiplier(prefix);
+      prefix = removeMultipliers(prefix);
+      
+      
+      int addH = 0;
+      if (prefix.startsWith("cyclo")) {
+        addH -= 2;
+        prefix = "cyclo";
+      }
+      
+      if (addH == 0) return "";
+      
+      final int subH = multiplier*addH;
+      elementCount.compute("H", (k,v) -> v+subH);
+      System.out.println("Clean prefix: " + prefix);
+      return prefix;
     }
 }
