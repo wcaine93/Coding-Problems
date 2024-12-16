@@ -19,10 +19,11 @@ public class FPT {
   }
 
   public List<Integer> solve() {
+    paths.add(new Path(stations[0], 1));
     while (solution == null) {
       pathfind();
       if (paths.isEmpty()) return null;
-      paths.sort(null);
+      paths.sort(null); // use natural sorting
     }
     return solution.path;
   }
@@ -37,8 +38,7 @@ public class FPT {
     for (Integer nextPlace : nextPlaces) {
       if (currPath.path.contains(nextPlace)) continue;
       
-      if (nextPlace == currPath.nextStation) paths.add(currPath.checkpoint(currPlace));
-      else paths.add(currPath.moveTo(nextPlace));
+      paths.add(currPath.moveTo(nextPlace, nextPlace == stations[currPath.nextStation]));
     }
   }
 }
@@ -54,6 +54,7 @@ class Path implements Comparable {
   Path() {}
   Path(int currPos, int nextStation) {
     path.add(currPos);
+    this.nextStation = nextStation;
     // euclidian distance of current location from station
     cost = Math.sqrt(Math.pow(locate(nextStation)[0] - locate(currPos)[0], 2) + Math.pow(locate(nextStation)[1] - locate(currPos)[1], 2));
   }
@@ -79,15 +80,11 @@ class Path implements Comparable {
     return location;
   }
   
-  public Path moveTo(int place) {
-    Path newPath = new Path(place, nextStation);
-    newPath.addCost(cost);
-    return newPath;
-  }
-  
-  public Path checkpoint(int nextStation) {
-    Path newPath = new Path(this.nextStation, nextStation);
-    newPath.addCost(-10);
+  public Path moveTo(int place, boolean isStation) {
+    int station = nextStation + (isStation ? 1 : 0);
+    
+    Path newPath = new Path(place, station);
+    newPath.addCost(isStation ? -10 : cost);
     return newPath;
   }
 }
