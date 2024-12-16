@@ -63,9 +63,9 @@ public class ParseHer {
         if (root.equals("")) continue;
         
         for (int i = 1; i < RADICALS.length+1; i++) {
-          if (root.equals(RADICALS[i-1])) {
-            final int addC = i;
-            final int addH = 2*i+2;
+          if (removeMultipliers(root).equals(RADICALS[i-1])) {
+            final int addC = i*getMultiplier(root);
+            final int addH = 2*addC + 2;
             elementCount.compute("C", (k,v) -> v+addC);
             elementCount.compute("H", (k,v) -> v+addH);
             break;
@@ -74,14 +74,47 @@ public class ParseHer {
       }
     }
   
+    private int getMultiplier(String group) {
+      for (String root : RADICALS) group = group.replace(root, "");
+      System.out.println("Group: " + group);
+      
+      int multiplier = 1;
+      for (int i = 2; i < MULTIPLIERS.length+2; i++) {
+        String mult = MULTIPLIERS[i-2];
+        if (group.indexOf(mult) != -1) {
+          multiplier *= i;
+          group = group.replaceFirst(mult, "");
+          
+          i = i-1;
+          continue;
+        }
+      }
+      System.out.println("Multiplier: " + multiplier);
+      return multiplier;
+    }
+  
+    private String removeMultipliers(String group) {
+      for (String mult : MULTIPLIERS) group = group.replace(mult, "");
+      return group;
+    }
+  
     private String identifySuffix(String group) {
       String suffix = group;
       for (String root : RADICALS) suffix = suffix.replace(root, "");
       System.out.println("Suffix: " + suffix);
       
-      // do nothing if suffix is "ane"
-      if (suffix.equals("ene") || suffix.equals("yl")) elementCount.compute("H", (k,v) -> v-2);
+      suffix = removeMultipliers(suffix);
+      int multiplier = getMultiplier(suffix);
       
+      int addH = 0;
+      // do nothing if suffix is "ane"
+      if (suffix.equals("ene") || suffix.equals("yl")) addH -= 2;
+      
+      
+      final int subH = multiplier*addH;
+      System.out.println(elementCount.get("H"));
+      elementCount.compute("H", (k,v) -> v+subH);
+      System.out.println(elementCount.get("H"));
       return suffix;
     }
 }
