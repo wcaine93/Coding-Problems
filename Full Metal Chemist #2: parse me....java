@@ -21,12 +21,14 @@ public class ParseHer {
     // Note that alkanes, alkenes alkynes, and akyles aren't present in these lists
     
     String name;
-    ArrayList<String> groups = new ArrayList<String>();
-    Map<String, Integer> elementCount = new HashMap<>(Map.of("C", 0, "H", 0));
+    ArrayList<String> groups;
+    Map<String, Integer> elementCount;
     
     
     public ParseHer(String name) {
       this.name = name;
+      groups = new ArrayList<String>();
+      elementCount = new HashMap<>(Map.of("C", 0, "H", 0));
     }
     
     public Map<String,Integer> parse() {
@@ -59,8 +61,11 @@ public class ParseHer {
   
     public void count() {
       for (String group : groups) {
+        System.out.println("Original: " + elementCount);
         String root = group.replace(identifyPrefix(group), "");
+        System.out.println("After prefix: " + elementCount);
         root = root.replace(identifySuffix(root), "");
+        System.out.println("After suffix: " + elementCount);
         System.out.println("Root: " + root);
         if (root.equals("")) continue;
         
@@ -73,6 +78,8 @@ public class ParseHer {
             break;
           }
         }
+        
+        System.out.println("Final: " + elementCount);
       }
     }
   
@@ -108,17 +115,37 @@ public class ParseHer {
       
       int multiplier = getMultiplier(suffix);
       suffix = removeMultipliers(suffix);
+      countSuffix(suffix, multiplier);
       
-      int addH = 0;
-      // do nothing if suffix is "ane"
-      if (suffix.equals("ene") || suffix.equals("yl")) addH -= 2;
-      if (suffix.equals("yne")) addH -= 4;
-      
-      
-      final int subH = multiplier*addH;
-      elementCount.compute("H", (k,v) -> v+subH);
       System.out.println("Clean suffix: " + suffix);
       return suffix;
+    }
+  
+    private void countSuffix(String suffix, final int multiplier) {
+      HashMap<String, Integer> changeBy = new HashMap<String, Integer>(Map.of("H", 0));
+      
+      for (String s : SUFFIXES) {
+        if (suffix.endsWith(s)) {
+          suffix = suffix.substring(0, suffix.indexOf(s)) + "e";
+          
+          if (s.equals("ol")) {
+            changeBy.merge("O", 1, (k,v) -> v+1);
+          }
+        }
+      }
+      // do nothing if suffix is "ane"
+      if (suffix.equals("ene") || suffix.equals("yl")) changeBy.compute("H", (k,v) -> v-2);
+      if (suffix.equals("yne")) changeBy.compute("H", (k,v) -> v-4);;
+      
+      
+      System.out.println("multiplier: " + multiplier + ", changeBy: " + changeBy);
+      for (String element : changeBy.keySet()) {
+        final int change = changeBy.get(element)*multiplier;
+        System.out.println("Element: " + element + ", change: " + change);
+        System.out.println("Pre-suffix: " + elementCount.get(element));
+        elementCount.merge(element, change, Integer::sum);
+        System.out.println("Post-suffix: " + elementCount.get(element));
+      }
     }
   
     private String identifyPrefix(String group) {
