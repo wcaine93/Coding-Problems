@@ -20,43 +20,64 @@ public class ParseHer {
     
     // Note that alkanes, alkenes alkynes, and akyles aren't present in these lists
     
-    Scanner name;
+    String name;
+    ArrayList<String> groups = new ArrayList<String>();
     Map<String, Integer> elementCount = new HashMap<>(Map.of("C", 0, "H", 0));
     
     
     public ParseHer(String name) {
-      this.name = new Scanner(name).useDelimiter("-?[\\d,]*-");
+      this.name = name;
     }
     
     public Map<String,Integer> parse() {
-      while (name.hasNext()) {
-        String section = name.next();
-        
-        if (section.matches(".*yl.*")) {
-          Scanner parts = new Scanner(section).useDelimiter("yl");
-          section = parts.next();
-          
-          for (int i = 1; i < RADICALS.length + 1; i++) {
-            if (section.equals(RADICALS[i-1])) {
-              final int C = i, H = 2*i;
-              elementCount.compute("C", (k,v) -> v+=C);
-              elementCount.compute("H", (k,v) -> v+=H);
-            }
-          }
-          section = parts.next();
-        } if (section.matches(".*ane")) {
-          section = section.replace("ane", "");
-          
-          for (int i = 1; i < RADICALS.length + 1; i++) {
-            if (section.equals(RADICALS[i-1])) {
-              final int C = i, H = 2*i+2;
-              elementCount.compute("C", (k,v) -> v+=C);
-              elementCount.compute("H", (k,v) -> v+=H);
-            }
-          }
-        } else System.out.println("unknown: " + section);
-      }
+      (new Scanner(name)).useDelimiter("-?[\\d,]*-").forEachRemaining(groups::add);
+      
+      separate();
+      
+      System.out.println(groups);
+      count();
       
       return elementCount;
-    }    
+    }
+  
+    public void separate() {
+      for (int i = 0; i < groups.size(); i++) {
+        String group = groups.get(i);
+        int index = group.indexOf("yl");
+        
+        if (index != -1) {
+          groups.remove(i);
+          
+          String pre = group.substring(0, index+2);
+          String post = group.substring(index+2);
+          
+          if (!post.isEmpty()) groups.add(post);
+          groups.add(i, pre);
+        }
+      }
+    }
+  
+    public void count() {
+      for (String group : groups) {
+        for (int i = 1; i < RADICALS.length+1; i++) {
+          if (group.replace(identifySuffix(group), "").equals(RADICALS[i-1])) {
+            final int addC = i;
+            final int addH = 2*i+2;
+            elementCount.compute("C", (k,v) -> v+addC);
+            elementCount.compute("H", (k,v) -> v+addH);
+            break;
+          }
+        }
+      }
+    }
+  
+    private String identifySuffix(String group) {
+      if (group.contains("ane")) return "ane";
+      if (group.contains("ene")) {
+        elementCount.compute("H", (k,v) -> v-2);
+        return "ene";
+      }
+      
+      return "";
+    }
 }
