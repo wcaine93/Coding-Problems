@@ -99,12 +99,13 @@ public class ParseHer {
     
     public ParseHer(String name) {
       this.name = name;
-      elementCount = new HashMap<>(Map.of("C", 0, "H", 0));
+      elementCount = new HashMap<>();
     }
     
     public Map<String,Integer> parse() {
-      System.out.println("3".matches("[\\d,]+"));
       count(name);
+      
+      for (String element : elementCount.keySet()) if (elementCount.get(element) == 0) elementCount.remove(element);
       
       return elementCount;
     }
@@ -114,12 +115,13 @@ public class ParseHer {
       
       int multiplier = 1;
       boolean multiplierApplied = false;
-      boolean afterNumber; // for amine, phosphine & arsine edge cases
+      boolean afterNumber = false; // for amine, phosphine & arsine edge cases
       String part = "";
       while (parts.hasNext()) {
-        afterNumber = part.isEmpty() ? false : part.matches("[\\d,]+");
+        System.out.println("After Number: " + afterNumber);
         part = parts.next();
         System.out.println("Part: " + part);
+        System.out.println("Multiplier: " + multiplier);
         
         while (!part.isEmpty()) {
           if (part.matches("[\\d,]+")) { // if number
@@ -131,11 +133,11 @@ public class ParseHer {
               scnr.next();
             }
             
-            part = "";
+            part = parts.next();
+            if (multiplier != 1) part = part.replaceFirst(MULTIPLIERS.get(multiplier), "");
             multiplierApplied = false;
+            afterNumber = true;
           }
-
-          if (multiplier != 1) part = part.replaceFirst(MULTIPLIERS.get(multiplier), "");
           
           for (String prefix : PREFIXES.keySet()) {
             if (part.startsWith(prefix)) {
@@ -178,7 +180,7 @@ public class ParseHer {
           
           for (int i = 2; i+2 < MULTIPLIERS.size(); i++) {
             if (part.startsWith(MULTIPLIERS.get(i))) {
-              multiplier = i;
+              multiplier = i * (multiplier == 0 ? 1 : multiplier);
               multiplierApplied = false;
 
               part = part.replaceFirst(MULTIPLIERS.get(i), "");
@@ -195,6 +197,7 @@ public class ParseHer {
               
               part = part.replaceFirst(suffix, "");
               if (part.equals("e")) part = "";
+              afterNumber = false;
               break;
             }
           }
