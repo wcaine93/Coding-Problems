@@ -9,6 +9,7 @@ import static java.util.Map.entry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.Scanner;
 
 public class ParseHer {
@@ -60,9 +61,10 @@ public class ParseHer {
                                                                                                      entry("ol", new HashMap<>(Map.of("O", 1))),
                                                                                                      entry("al", new HashMap<>(Map.of("H", -2, "O", 1))),
                                                                                                      entry("one", new HashMap<>(Map.of("H", -2, "O", 1))),
-                                                                                                     entry("oic acid", new HashMap<>(Map.of("H", -2, "O", 2))),
-                                                                                                     entry("carboxylic acid", new HashMap<>(Map.of("H", -2, "O", 2))),
-                                                                                                     entry("oate", new HashMap<>(Map.of("H", -3, "O", 2))),
+                                                                                                     entry("oic", new HashMap<>(Map.of("H", -2, "O", 2))),
+                                                                                                     entry("carboxylic", new HashMap<>(Map.of("H", -2, "O", 2))),
+                                                                                                     entry("acid", new HashMap<>(Map.of())),
+                                                                                                     entry("oate", new HashMap<>(Map.of("H", -2, "O", 2))),
                                                                                                      entry("ether", new HashMap<>(Map.of("H", -2, "O", 1))),
                                                                                                      entry("amide", new HashMap<>(Map.of("H", -1, "O", 1, "N", 1))),
                                                                                                      entry("imine", new HashMap<>(Map.of("H", -1, "N", 1))),
@@ -93,6 +95,7 @@ public class ParseHer {
                                                                                                      entry("iodo", new HashMap<>(Map.of("H", -1, "I", 1)))
                                                                                                    ));
     
+  
     String name;
     Map<String, Integer> elementCount;
     
@@ -111,15 +114,14 @@ public class ParseHer {
     }
   
     public void count(String compound) {
-      Scanner parts = new Scanner(compound).useDelimiter("[-\\[\\]]");
+      Scanner parts = new Scanner(compound).useDelimiter("[-\\[\\] ]");
       
       int multiplier = 1;
       boolean multiplierApplied = false;
       boolean afterNumber = false; // for amine, phosphine & arsine edge cases
-      String part = "";
       while (parts.hasNext()) {
         System.out.println("After Number: " + afterNumber);
-        part = parts.next();
+        String part = parts.next();
         System.out.println("Part: " + part);
         System.out.println("Multiplier: " + multiplier);
         
@@ -160,7 +162,7 @@ public class ParseHer {
             }
           }
 
-          for (String root : RADICAL_CARBONS.keySet()) {
+          for (String root : new TreeSet<String>(RADICAL_CARBONS.keySet()).descendingSet()) {
             if (part.startsWith(root)) {
               System.out.println(root);
               int carbons = RADICAL_CARBONS.get(root);
@@ -178,7 +180,7 @@ public class ParseHer {
             }
           }
           
-          for (int i = 2; i+2 < MULTIPLIERS.size(); i++) {
+          for (int i = MULTIPLIERS.size()-1; i-2 >= 0; i--) {
             if (part.startsWith(MULTIPLIERS.get(i))) {
               multiplier = i * (multiplier == 0 ? 1 : multiplier);
               multiplierApplied = false;
@@ -198,6 +200,7 @@ public class ParseHer {
               part = part.replaceFirst(suffix, "");
               if (part.equals("e")) part = "";
               afterNumber = false;
+              multiplier = 1;
               break;
             }
           }
