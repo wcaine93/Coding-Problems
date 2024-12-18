@@ -106,18 +106,17 @@ public class ParseHer {
     }
     
     public Map<String,Integer> parse() {
-      count(name);
+      count(name, 1);
       
       for (String element : elementCount.keySet()) if (elementCount.get(element) == 0) elementCount.remove(element);
       
       return elementCount;
     }
   
-    public void count(String compound) {
+    public void count(String compound, int multiplier) {
+      System.out.println("Called!!");
       Scanner parts = new Scanner(compound).useDelimiter("[- ]");
       
-      int multiplier = 1;
-      int bracesMultiplier = 1;
       boolean multiplierApplied = false;
       boolean afterNumber = false; // for amine, phosphine & arsine edge cases
       while (parts.hasNext()) {
@@ -128,25 +127,31 @@ public class ParseHer {
         
         while (!part.isEmpty()) {
           if (part.startsWith("[")) {
-            part = part.substring(1);
-            bracesMultiplier = multiplier;
-          } else if (part.startsWith("]")) {
-            part = part.substring(1);
-            multiplier = bracesMultiplier;
-            multiplierApplied = false;
-          }
+            int close = part.indexOf("]");
+            if (close != -1) {
+              count(part.substring(1, close), multiplier);
+              part = part.substring(close+1);
+            } else {
+              count(part.substring(1) + parts.findInLine(".*?]"), multiplier);
+              part = "";
+            }
+            System.out.println("multiplier after call: " + multiplier);
+          } else if (part.equals("]")) return;
+          else if (part.startsWith("]")) part = part.substring(1);
           
           if (part.matches("[\\d,]+")) { // if number
             Scanner scnr = new Scanner(part).useDelimiter(",");
-            multiplier = 0;
             
+            int mult = 0;
             while (scnr.hasNext()) {
-              multiplier++;
+              mult++;
               scnr.next();
             }
+            multiplier *= mult;
+            System.out.println("New multiplier: " + multiplier);
             
             part = parts.next();
-            if (multiplier != 1) part = part.replaceFirst(MULTIPLIERS.get(multiplier), "");
+            if (mult != 1) part = part.replaceFirst(MULTIPLIERS.get(mult), "");
             multiplierApplied = false;
             afterNumber = true;
           }
@@ -210,7 +215,7 @@ public class ParseHer {
               part = part.replaceFirst(suffix, "");
               if (part.equals("e")) part = "";
               afterNumber = false;
-              multiplier = 1;
+              if (!part.startsWith("yl")) multiplier = 1;
               break;
             }
           }
