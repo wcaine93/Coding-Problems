@@ -114,9 +114,10 @@ public class ParseHer {
     }
   
     public void count(String compound) {
-      Scanner parts = new Scanner(compound).useDelimiter("[-\\[\\] ]");
+      Scanner parts = new Scanner(compound).useDelimiter("[- ]");
       
       int multiplier = 1;
+      int bracesMultiplier = 1;
       boolean multiplierApplied = false;
       boolean afterNumber = false; // for amine, phosphine & arsine edge cases
       while (parts.hasNext()) {
@@ -126,6 +127,15 @@ public class ParseHer {
         System.out.println("Multiplier: " + multiplier);
         
         while (!part.isEmpty()) {
+          if (part.startsWith("[")) {
+            part = part.substring(1);
+            bracesMultiplier = multiplier;
+          } else if (part.startsWith("]")) {
+            part = part.substring(1);
+            multiplier = bracesMultiplier;
+            multiplierApplied = false;
+          }
+          
           if (part.matches("[\\d,]+")) { // if number
             Scanner scnr = new Scanner(part).useDelimiter(",");
             multiplier = 0;
