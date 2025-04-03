@@ -6,6 +6,7 @@
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 enum Color {
   WHITE('o'),
@@ -37,6 +38,7 @@ enum Color {
 public class Go {
   private Map<String, Integer> size = new HashMap<>();
   private char[][] board;
+  private TreeSet<char[][]> boardStates = new TreeSet<>();
   private Color turn = Color.BLACK;
   
   Go(int size) { // create square board
@@ -84,6 +86,25 @@ public class Go {
         board[row][col] = '.';
       }
     }
+  }
+  
+  public void handicapStones(int num) throws IllegalStateException, IllegalArgumentException {
+    switch (size.get("height")) {
+      case 9: case 13: case 19: break;
+      default: throw new IllegalStateException("Handicap stones can only be placed on 9x9, 13x13 and 19x19 boards." +
+                                              " The height of this board is " + size.get("height"));
+    }
+    switch (size.get("width")) {
+      case 9: case 13: case 19: break;
+      default: throw new IllegalStateException("Handicap stones can only be placed on 9x9, 13x13 and 19x19 boards." +
+                                              " The height of this board is " + size.get("width"));
+    }
+    
+    if (boardStates.size() != 0) throw new IllegalStateException("Handicap stones may only be placed before the first move");
+    if (size.get("height") > 9 && num > 5) throw new IllegalArgumentException("Only 5 handicap stones may be placed on a 9x9 board");
+    else if (num > 9) throw new IllegalArgumentException("At most 9 handicap stones may be placed on a given board");
+    
+    
   }
   
   private void turn() { this.turn = Color.change(this.turn); }
