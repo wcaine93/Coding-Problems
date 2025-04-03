@@ -85,4 +85,7 @@ public class Go {
       }
     }
   }
+  
+  private void turn() { this.turn = Color.change(this.turn); }
+  public void passTurn() { turn(); }
 }
