@@ -8,33 +8,35 @@ import java.util.Map;
 import java.util.HashMap;
 
 enum Color {
-  WHITE('o', "white"),
-  BLACK('x', "black");
+  WHITE('o'),
+  BLACK('x');
   
   private char stone;
-  private String name;
   
-  Color(char stone, String name) {
-    this.stone = stone;
-    this.name = name;
-  }
+  Color(char stone) { this.stone = stone; }
   
   public char getStone() { return this.stone; }
-  public String getName() { return this.name; }
+  
+  @Override
+  public String toString() {
+    return switch (this) {
+      case BLACK -> "black";
+      case WHITE -> "white";
+    };
+  }
   
   public static Color change(Color c) {
-    switch (c) {
-      case WHITE:
-        return BLACK;
-      default:
-        return WHITE;
-    }
+    return switch (c) {
+      case WHITE -> BLACK;
+      case BLACK -> WHITE;
+    };
   }
 }
 
 public class Go {
   private Map<String, Integer> size = new HashMap<>();
   private char[][] board;
+  private Color turn = Color.BLACK;
   
   Go(int size) { // create square board
     this.size.put("height", size);
@@ -51,6 +53,7 @@ public class Go {
   
   public Map getSize() { return this.size; }
   public char[][] getBoard() { return this.board; }
+  public String getTurn() { return this.turn.toString(); }
   
   private void createBoard() throws IllegalArgumentException {
     if (size.get("height") <= 0) throw new IllegalArgumentException("Board height must be positive");
