@@ -22,7 +22,7 @@ enum Color {
   public char getStone() { return this.stone; }
   public String getName() { return this.name; }
   
-  public static change(Color c) {
+  public static Color change(Color c) {
     switch (c) {
       case WHITE:
         return BLACK;
