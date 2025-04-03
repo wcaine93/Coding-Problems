@@ -26,6 +26,7 @@ enum Color {
   }
   
   public static Color change(Color c) {
+    // returns the opposite color from the one passed
     return switch (c) {
       case WHITE -> BLACK;
       case BLACK -> WHITE;
@@ -54,6 +55,22 @@ public class Go {
   public Map getSize() { return this.size; }
   public char[][] getBoard() { return this.board; }
   public String getTurn() { return this.turn.toString(); }
+  public char getPosition(String pos) { return find(pos); }
+  
+  private char find(String pos) {
+    // returns the character in a certain location (e.g., A1, K6) on the board
+    // the board is numbered with descending numbers for rows and ascending letters for columns
+    // the letter I is excluded from lettering
+    
+    char letter = pos.charAt(0);
+    int col = Integer.valueOf(letter);
+    col -= letter > 73 ? 66 : 65; // 73 is the offset of I in ascii, 65 the offset of A
+    
+    pos = pos.substring(1);
+    int row = size.get("height") - Integer.valueOf(pos); // reverse the numbering of rows
+    
+    return board[row][col];
+  }
   
   private void createBoard() throws IllegalArgumentException {
     if (size.get("height") <= 0) throw new IllegalArgumentException("Board height must be positive");
