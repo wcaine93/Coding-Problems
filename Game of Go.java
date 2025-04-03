@@ -88,6 +88,12 @@ public class Go {
     }
   }
   
+  private void placeStone(int row, int col) throws IllegalStateException {
+    if (board[row][col] != '.') throw new IllegalStateException("Stones cannot be placed on top of other stones.");
+    
+    board[row][col] = turn.getStone();
+  }
+  
   public void handicapStones(int num) throws IllegalStateException, IllegalArgumentException {
     switch (size.get("height")) {
       case 9: case 13: case 19: break;
