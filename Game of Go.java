@@ -34,8 +34,6 @@ enum Color {
 
 public class Go {
   private Map<String, Integer> size = new HashMap<>();
-  private int height;
-  private int width;
   private char[][] board;
   
   Go(int size) { // create square board
@@ -47,19 +45,21 @@ public class Go {
   Go(int height, int width) {
     size.put("height", height);
     size.put("width", width);
+    
+    createBoard();
   }
   
   public Map getSize() { return this.size; }
   public char[][] getBoard() { return this.board; }
   
   private void createBoard() throws IllegalArgumentException {
-    if (height <= 0) throw new IllegalArgumentException("Board height must be positive");
-    if (width <= 0) throw new IllegalArgumentException("Board width must be positive");
+    if (size.get("height") <= 0) throw new IllegalArgumentException("Board height must be positive");
+    if (size.get("width") <= 0) throw new IllegalArgumentException("Board width must be positive");
     
     // create empty board of size height x width
-    board = new char[height][width];
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
+    board = new char[size.get("height")][size.get("width")];
+    for (int row = 0; row < size.get("height"); row++) {
+      for (int col = 0; col < size.get("width"); col++) {
         // . represents empty spaces
         board[row][col] = '.';
       }
