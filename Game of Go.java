@@ -110,7 +110,18 @@ public class Go {
     if (size.get("height") > 9 && num > 5) throw new IllegalArgumentException("Only 5 handicap stones may be placed on a 9x9 board");
     else if (num > 9) throw new IllegalArgumentException("At most 9 handicap stones may be placed on a given board");
     
+    // see kata for handicap details
+    int[][] stonePlacements = switch (size.get("height")) {
+      case 9 -> new int[][] {{2, 6}, {6, 2}, {6, 6}, {2, 2}, {4, 4}};
+      case 13 -> new int[][] {{3, 9}, {9, 3}, {9, 9}, {3, 3}, {6, 6}, {6, 3}, {6, 9}, {3, 6}, {9, 6}};
+      case 19 -> new int[][] {{3, 15}, {15, 3}, {15, 15}, {3, 3}, {9, 9}, {9, 3}, {9, 15}, {3, 9}, {15, 9}};
+      default -> new int[0][0];
+    };
     
+    for (int i = 0; i < num; i++) {
+      // array index exception handling done above
+      placeStone(stonePlacements[i][0], stonePlacements[i][1]);
+    }
   }
   
   private void turn() { this.turn = Color.change(this.turn); }
