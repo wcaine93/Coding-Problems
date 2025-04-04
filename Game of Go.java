@@ -94,8 +94,12 @@ public class Go {
     return new int[] {row, col};
   }
   
-  private void placeStone(int row, int col) throws IllegalStateException {
-    if (board[row][col] != '.') throw new IllegalStateException("Stones cannot be placed on top of other stones.");
+  private void placeStone(int[] coords) throws IllegalArgumentException, IllegalStateException {
+    int row = coords[0];
+    int col = coords[1];
+    
+    if (row > size.get("height") || col > size.get("width")) throw new IllegalArgumentException("Stones may not be placed out of bounds");
+    if (board[row][col] != '.') throw new IllegalStateException("Stones cannot be placed on top of other stones");
     
     board[row][col] = turn.getStone();
   }
@@ -126,7 +130,7 @@ public class Go {
     
     for (int i = 0; i < num; i++) {
       // array index exception handling done above
-      placeStone(stonePlacements[i][0], stonePlacements[i][1]);
+      placeStone(stonePlacements[i]);
     }
   }
   
@@ -138,9 +142,7 @@ public class Go {
   }
   
   private void move(String pos) {
-    int[] coords = find(pos);
-    
-    board[coords[0]][coords[1]] = turn.getStone();
+    placeStone(find(pos));
     turn();
   }
   
