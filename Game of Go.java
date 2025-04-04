@@ -79,11 +79,14 @@ public class Go {
     }
   }
   
-  private int[] find(String pos) {
+  private int[] find(String pos) throws IllegalArgumentException {
     System.out.println(pos);
     // returns the coordinates of a certain location (e.g., 1A, 6K) on the board
     // the board is numbered with descending numbers for rows and ascending letters for columns
     // the letter I is excluded from lettering
+    
+    if (pos.split("\\D").length == 0) throw new IllegalArgumentException("Board position must have a number");
+    if (pos.split("\\d+").length == 0) throw new IllegalArgumentException("Board position must have a letter");
     
     int row = size.get("height") - Integer.valueOf(pos.split("\\D")[0]); // reverse the numbering of rows
     
