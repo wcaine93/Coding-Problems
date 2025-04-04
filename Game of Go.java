@@ -80,16 +80,16 @@ public class Go {
   }
   
   private int[] find(String pos) {
-    // returns the coordinates of a certain location (e.g., A1, K6) on the board
+    System.out.println(pos);
+    // returns the coordinates of a certain location (e.g., 1A, 6K) on the board
     // the board is numbered with descending numbers for rows and ascending letters for columns
     // the letter I is excluded from lettering
     
-    char letter = pos.charAt(0);
+    int row = size.get("height") - Integer.valueOf(pos.split("\\D")[0]); // reverse the numbering of rows
+    
+    char letter = pos.split("\\d+")[1].charAt(0);
     int col = Integer.valueOf(letter);
     col -= letter > 73 ? 66 : 65; // 73 is the offset of I in ascii, 65 the offset of A
-    
-    pos = pos.substring(1);
-    int row = size.get("height") - Integer.valueOf(pos); // reverse the numbering of rows
     
     return new int[] {row, col};
   }
