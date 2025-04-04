@@ -63,6 +63,22 @@ public class Go {
     return board[coords[0]][coords[1]];
   }
   
+  private void createBoard() throws IllegalArgumentException {
+    if (size.get("height") <= 0) throw new IllegalArgumentException("Board height must be positive");
+    if (size.get("width") <= 0) throw new IllegalArgumentException("Board width must be positive");
+    if (size.get("height") > 19) throw new IllegalArgumentException("Maximum board height is 19 spaces");
+    if (size.get("width") > 19) throw new IllegalArgumentException("Maximum board width is 19 spaces");
+    
+    // create empty board of size height x width
+    board = new char[size.get("height")][size.get("width")];
+    for (int row = 0; row < size.get("height"); row++) {
+      for (int col = 0; col < size.get("width"); col++) {
+        // . represents empty spaces
+        board[row][col] = '.';
+      }
+    }
+  }
+  
   private int[] find(String pos) {
     // returns the coordinates of a certain location (e.g., A1, K6) on the board
     // the board is numbered with descending numbers for rows and ascending letters for columns
@@ -76,20 +92,6 @@ public class Go {
     int row = size.get("height") - Integer.valueOf(pos); // reverse the numbering of rows
     
     return new int[] {row, col};
-  }
-  
-  private void createBoard() throws IllegalArgumentException {
-    if (size.get("height") <= 0) throw new IllegalArgumentException("Board height must be positive");
-    if (size.get("width") <= 0) throw new IllegalArgumentException("Board width must be positive");
-    
-    // create empty board of size height x width
-    board = new char[size.get("height")][size.get("width")];
-    for (int row = 0; row < size.get("height"); row++) {
-      for (int col = 0; col < size.get("width"); col++) {
-        // . represents empty spaces
-        board[row][col] = '.';
-      }
-    }
   }
   
   private void placeStone(int row, int col) throws IllegalStateException {
