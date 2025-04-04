@@ -58,10 +58,13 @@ public class Go {
   public Map getSize() { return this.size; }
   public char[][] getBoard() { return this.board; }
   public String getTurn() { return this.turn.toString(); }
-  public char getPosition(String pos) { return find(pos); }
+  public char getPosition(String pos) {
+    int[] coords = find(pos);
+    return board[coords[0]][coords[1]];
+  }
   
-  private char find(String pos) {
-    // returns the character in a certain location (e.g., A1, K6) on the board
+  private int[] find(String pos) {
+    // returns the coordinates of a certain location (e.g., A1, K6) on the board
     // the board is numbered with descending numbers for rows and ascending letters for columns
     // the letter I is excluded from lettering
     
@@ -72,7 +75,7 @@ public class Go {
     pos = pos.substring(1);
     int row = size.get("height") - Integer.valueOf(pos); // reverse the numbering of rows
     
-    return board[row][col];
+    return new int[] {row, col};
   }
   
   private void createBoard() throws IllegalArgumentException {
