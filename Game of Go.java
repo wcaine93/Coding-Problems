@@ -131,6 +131,17 @@ public class Go {
   private void turn() { this.turn = Color.change(this.turn); }
   public void passTurn() { turn(); }
   
+  public void move(String... poses) {
+    for (String pos : poses) move(pos);
+  }
+  
+  private void move(String pos) {
+    int[] coords = find(pos);
+    
+    board[coords[0]][coords[1]] = turn.getStone();
+    turn();
+  }
+  
   public void rollBack(int moves) throws IllegalArgumentException {
     // rolls the board state back moves number of moves
     
