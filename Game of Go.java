@@ -147,6 +147,12 @@ public class Go {
   private void move(String pos) {
     placeStone(find(pos));
     turn();
+    
+    // roll back moves that yield a previous board state (KO rule)
+    if (!boardStates.isEmpty() && boardStates.subList(0, boardStates.size()-1).contains(board)) {
+      rollBack(1);
+      turn();
+    }
   }
   
   public void rollBack(int moves) throws IllegalArgumentException {
