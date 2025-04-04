@@ -97,12 +97,12 @@ public class Go {
     return new int[] {row, col};
   }
   
-  private void placeStone(int[] coords) throws IllegalArgumentException, IllegalStateException {
+  private void placeStone(int[] coords) throws IllegalArgumentException {
     int row = coords[0];
     int col = coords[1];
     
     if (row > size.get("height") || col > size.get("width")) throw new IllegalArgumentException("Stones may not be placed out of bounds");
-    if (board[row][col] != '.') throw new IllegalStateException("Stones cannot be placed on top of other stones");
+    if (board[row][col] != '.') throw new IllegalArgumentException("Stones cannot be placed on top of other stones");
     
     board[row][col] = turn.getStone();
   }
