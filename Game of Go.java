@@ -6,7 +6,8 @@
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.ArrayList;
 
 enum Color {
   WHITE('o'),
@@ -38,7 +39,7 @@ enum Color {
 public class Go {
   private Map<String, Integer> size = new HashMap<>();
   private char[][] board;
-  private TreeSet<char[][]> boardStates = new TreeSet<>();
+  private List<char[][]> boardStates = new ArrayList<>();
   private Color turn = Color.BLACK;
   
   Go(int size) { // create square board
@@ -126,4 +127,21 @@ public class Go {
   
   private void turn() { this.turn = Color.change(this.turn); }
   public void passTurn() { turn(); }
+  
+  public void rollBack(int moves) throws IllegalArgumentException {
+    // rolls the board state back moves number of moves
+    
+    if (moves > boardStates.size()) throw new IllegalArgumentException("Game cannot be rolled back before the start of the game");
+    
+    boardStates.subList(boardStates.size() - moves, boardStates.size()).clear();
+    board = boardStates.get(boardStates.size() - 1);
+    
+    if (moves % 2 != 0) turn();
+  }
+  
+  public void reset() {
+    createBoard();
+    boardStates.clear();
+    turn = Color.BLACK;
+  }
 }
