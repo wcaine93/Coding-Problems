@@ -147,7 +147,10 @@ public class Go {
   public void rollBack(int moves) throws IllegalArgumentException {
     // rolls the board state back moves number of moves
     
-    if (moves > boardStates.size()) throw new IllegalArgumentException("Game cannot be rolled back before the start of the game");
+    if (moves > boardStates.size()) {
+      reset();
+      return;
+    }
     
     boardStates.subList(boardStates.size() - moves, boardStates.size()).clear();
     board = boardStates.get(boardStates.size() - 1);
